@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+  
+    <title>Universal Paperclips Reloaded</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        header {
+            background-color: #333;
+            color: #fff;
+            width: 100%;
+            padding: 1em;
+            text-align: center;
+        }
+        main {
+            padding: 1em;
+            text-align: center;
+        }
+        button {
+            padding: 0.5em 1em;
+            margin: 0.5em;
+            font-size: 1em;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #stats {
+            margin: 1em 0;
+        }
+        .upgrade {
+            margin-top: 1em;
+        }
+        .hidden {
+            display: none;
+        }
+        .reward {
+            font-weight: bold;
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Universal Paperclips📎 </h1>
+    </header>
+    <main>
+        <div id="menu">
+            <button id="start-game">Start Game</button>
+            <button id="load-game-menu">Load Game</button>
+            <button id="view-stats">Statistics</button>
+            <button id="options-menu">Options</button>
+        </div>
+
+        <div id="game" class="hidden">
+            <h2>Make Paperclips</h2>
+            <button id="make-paperclip">Make Paperclip📎📎📎📎</button>
+            <div id="stats">
+                <p><strong>Paperclips:</strong> <span id="paperclip-count">0</span></p>
+                <p><strong>Wire:</strong> <span id="wire-count">100</span></p>
+                <p><strong>Money:</strong> $<span id="money-count">50</span></p>
+                <p><strong>Imagination:</strong> <span id="imagination-count">0</span></p>
+                <p><strong>Innovation Level:</strong> <span id="innovation-level">0</span></p>
+                <p><strong>Prestige Points:</strong> <span id="prestige-points">0</span></p>
+                <p><strong>Level:</strong> <span id="level">1</span></p>
+            </div>
+            <h2>Upgrades</h2>
+            <div class="upgrade">
+                <button id="buy-wire">Buy Wire (10 units - $5)</button>
+            </div>
+            <div class="upgrade">
+                <button id="auto-machine">Buy Auto-Machine ($50)</button>
+            </div>
+            <div class="upgrade">
+                <button id="marketing-boost">Launch Marketing Campaign ($30)</button>
+            </div>
+            <div class="upgrade">
+                <button id="optimize-production">Optimize Production ($100)</button>
+            </div>
+            <div class="upgrade">
+                <button id="buy-innovation">Buy Innovation Level ($200)</button>
+            </div>
+            <div class="upgrade">
+                <button id="expand-factory">Expand Factory ($500)</button>
+            </div>
+            <div class="upgrade">
+                <button id="sell-paperclips">Sell Paperclips</button>
+            </div>
+            <div class="upgrade">
+                <button id="prestige">Prestige ($1000)</button>
+            </div>
+            <div id="reward" class="hidden">
+                <p class="reward">You unlocked a special upgrade! 🎉</p>
+            </div>
+            <div id="special-rewards" class="hidden">
+                <p class="reward" id="special-machine">You unlocked a Super Advanced Machine!</p>
+                <p class="reward" id="super-production">You unlocked Super Production! Paperclips are made 2x faster.</p>
+                <p class="reward" id="extended-marketing">Your marketing campaigns last 2x longer!</p>
+                <p class="reward" id="assistant-factory">You unlocked an Assistant! Your factory runs 10% more efficient!</p>
+            </div>
+        </div>
+
+        <div id="stats-screen" class="hidden">
+            <h2>Statistics</h2>
+            <p><strong>Total Paperclips📎 Made:</strong> <span id="total-paperclips">0</span></p>
+            <p><strong>Total Money Earned:</strong> $<span id="total-money-earned">0</span></p>
+            <p><strong>Paperclips Sold:</strong> <span id="paperclips-sold">0</span></p>
+            <button id="back-to-menu">Back to Menu</button>
+        </div>
+
+        <div id="options" class="hidden">
+            <h2>Options</h2>
+            <button id="reset-game">Reset Game</button>
+            <button id="back-to-menu-options">Back to Menu</button>
+        </div>
+    </main>
+
+    <script>
+        // Variables initiales
+        let paperclips = 0;
+        let wire = 100;
+        let money = 50;
+        let autoMachineCost = 50;
+        let autoMachineCount = 0;
+        let totalPaperclips = 0;
+        let upgradesPurchased = 0;
+        let totalMoneyEarned = 0;
+        let imagination = 0;
+        let innovationLevel = 0;
+        let factoryExpansion = 0;
+        let marketingActive = false;
+        let paperclipsSold = 0;
+        let prestigePoints = 0;
+        let autoMachineInterval;
+        let playerLevel = 1;
+        let rewardUnlocked = false;
+        let specialMachineUnlocked = false;
+        let superProductionUnlocked = false;
+        let extendedMarketingUnlocked = false;
+        let assistantFactoryUnlocked = false;
+
+        // Mise à jour des statistiques
+        const updateStats = () => {
+            document.getElementById('paperclip-count').textContent = paperclips;
+            document.getElementById('wire-count').textContent = wire;
+            document.getElementById('money-count').textContent = money;
+            document.getElementById('imagination-count').textContent = imagination;
+            document.getElementById('innovation-level').textContent = innovationLevel;
+            document.getElementById('total-paperclips').textContent = totalPaperclips;
+            document.getElementById('total-money-earned').textContent = totalMoneyEarned;
+            document.getElementById('paperclips-sold').textContent = paperclipsSold;
+            document.getElementById('prestige-points').textContent = prestigePoints;
+            document.getElementById('level').textContent = playerLevel;
+        };
+
+        // Fonction pour afficher un écran
+        const showScreen = (screen) => {
+            document.getElementById('menu').classList.add('hidden');
+            document.getElementById('game').classList.add('hidden');
+            document.getElementById('stats-screen').classList.add('hidden');
+            document.getElementById('options').classList.add('hidden');
+            document.getElementById(screen).classList.remove('hidden');
+        };
+
+        // Gestion des événements de démarrage
+        document.getElementById('start-game').addEventListener('click', () => showScreen('game'));
+        document.getElementById('view-stats').addEventListener('click', () => showScreen('stats-screen'));
+        document.getElementById('options-menu').addEventListener('click', () => showScreen('options'));
+        document.getElementById('back-to-menu').addEventListener('click', () => showScreen('menu'));
+        document.getElementById('back-to-menu-options').addEventListener('click', () => showScreen('menu'));
+
+        // Fonction pour créer un paperclip
+        document.getElementById('make-paperclip').addEventListener('click', () => {
+            if (wire > 0) {
+                paperclips++;
+                totalPaperclips++;
+                wire--;
+                money += 5;
+                totalMoneyEarned += 5;
+                updateStats();
+            }
+        });
+
+        // Acheter du fil
+        document.getElementById('buy-wire').addEventListener('click', () => {
+            if (money >= 5) {
+                money -= 5;
+                wire += 10;
+                updateStats();
+            }
+        });
+
+        // Acheter la machine automatique
+        document.getElementById('auto-machine').addEventListener('click', () => {
+            if (money >= autoMachineCost) {
+                money -= autoMachineCost;
+                autoMachineCount++;
+                autoMachineInterval = setInterval(() => {
+                    paperclips++;
+                    totalPaperclips++;
+                    updateStats();
+                }, 1000);
+                updateStats();
+            }
+        });
+
+        // Lancer une campagne marketing
+        document.getElementById('marketing-boost').addEventListener('click', () => {
+            if (money >= 30) {
+                money -= 30;
+                upgradesPurchased++;
+                marketingActive = true;
+                setTimeout(() => {
+                    marketingActive = false;
+                }, 30000); // Le boost marketing dure 30 secondes
+                updateStats();
+            } else {
+                alert('Not enough money for a Marketing Campaign!');
+            }
+        });
+
+        // Optimiser la production
+        document.getElementById('optimize-production').addEventListener('click', () => {
+            if (money >= 100) {
+                money -= 100;
+                upgradesPurchased++;
+                paperclips += 10; // Optimiser la production donne un boost immédiat de paperclips
+                totalPaperclips += 10;
+                updateStats();
+            } else {
+                alert('Not enough money to optimize production!');
+            }
+        });
+
+        // Acheter l'innovation
+        document.getElementById('buy-innovation').addEventListener('click', () => {
+            if (money >= 200) {
+                money -= 200;
+                innovationLevel++;
+                updateStats();
+            } else {
+                alert('Not enough money for Innovation Level!');
+            }
+        });
+
+        // Expansion de l'usine
+        document.getElementById('expand-factory').addEventListener('click', () => {
+            if (money >= 500) {
+                money -= 500;
+                factoryExpansion++;
+                updateStats();
+            } else {
+                alert('Not enough money for Factory Expansion!');
+            }
+        });
+
+        // Vendre des paperclips
+        document.getElementById('sell-paperclips').addEventListener('click', () => {
+            if (paperclips > 0) {
+                paperclipsSold += paperclips;
+                totalMoneyEarned += paperclips * 2; // Chaque paperclip vendu rapporte 2$
+                money += paperclips * 2;
+                paperclips = 0;
+                updateStats();
+            }
+        });
+
+        // Fonction de prestige
+        document.getElementById('prestige').addEventListener('click', () => {
+            if (money >= 1000) {
+                money -= 1000;
+                prestigePoints++;
+                totalPaperclips = 0; // Réinitialise le nombre de paperclips
+                updateStats();
+                alert('You have prestige points! Your progress has been reset for new rewards.');
+            }
+        });
+
+        // Vérification de la récompense spéciale
+        const checkSpecialReward = () => {
+            if (totalPaperclips >= 100 && !rewardUnlocked) {
+                document.getElementById('reward').classList.remove('hidden');
+                rewardUnlocked = true;
+            }
+
+            if (totalPaperclips >= 500 && !specialMachineUnlocked) {
+                document.getElementById('special-machine').classList.remove('hidden');
+                specialMachineUnlocked = true;
+            }
+
+            if (totalPaperclips >= 1000 && !superProductionUnlocked) {
+                document.getElementById('super-production').classList.remove('hidden');
+                superProductionUnlocked = true;
+            }
+
+            if (totalPaperclips >= 1500 && !extendedMarketingUnlocked) {
+                document.getElementById('extended-marketing').classList.remove('hidden');
+                extendedMarketingUnlocked = true;
+            }
+
+            if (totalPaperclips >= 2000 && !assistantFactoryUnlocked) {
+                document.getElementById('assistant-factory').classList.remove('hidden');
+                assistantFactoryUnlocked = true;
+            }
+        };
+
+        // Fonction de niveau
+        const levelUp = () => {
+            if (totalPaperclips >= playerLevel * 100) {
+                playerLevel++;
+                alert(`Congratulations! You've reached level ${playerLevel}. More upgrades unlocked!`);
+                checkSpecialReward();
+                updateStats();
+            }
+        };
+
+        // Vérifier le niveau toutes les 10 secondes
+        setInterval(levelUp, 10000);
+
+        // Retour à l'écran de jeu
+        updateStats();
+    </script>
+</body>
+</html>
